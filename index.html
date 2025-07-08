@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Paragon - World</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="game-world">
+        <div class="main-header">
+            <h1>GST <span>PARAGON</span></h1>
+        </div>
+
+        <div class="level-track-container">
+            <div id="level-track">
+                <!-- GOKU IS NOW INSIDE THE TRACK -->
+                <div id="goku-character">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <!-- Level cards will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- (Modal HTML remains the same) -->
+    <div id="puzzle-modal-overlay">
+        <div id="puzzle-modal">
+            <div id="satisfaction-container">
+                <label id="satisfaction-label">Case Progress</label>
+                <div class="satisfaction-bar-bg">
+                    <div id="satisfaction-bar"></div>
+                </div>
+            </div>
+            <div id="character-dialogue">
+                <div>
+                    <div id="character-name"></div>
+                    <p id="dialogue-text"></p>
+                </div>
+            </div>
+            <div id="puzzle-container">
+                <p id="puzzle-question"></p>
+                <div id="puzzle-options"></div>
+            </div>
+            <div id="feedback-box"></div>
+        </div>
+    </div>
+
+    <script src="game-data.js"></script>
+    <script>
+        // --- (DOM ELEMENTS, GAME STATE, and LOCAL STORAGE functions remain the same) ---
+        const levelTrack = document.getElementById('level-track');
+        const gokuCharacter = document.getElementById('goku-character');
+        const puzzleModalOverlay = document.getElementById('puzzle-modal-overlay');
+        const puzzleModal = document.getElementById('puzzle-modal');
+        const satisfactionLabel = document.getElementById('satisfaction-label');
+        const satisfactionBar = document.getElementById('satisfaction-bar');
+        const characterNameEl = document.getElementById('character-name');
+        const dialogueTextEl = document.getElementById('dialogue-text');
+        const puzzleQuestionEl = document.getElementById('puzzle-question');
+        const puzzleOptionsEl = document.getElementById('puzzle-options');
+        const feedbackBox = document.getElementById('feedback-box');
+        let gameState;
+        const STORAGE_KEY = 'gstParagonProgress';
+        let currentLevelId = null;
+        let currentPuzzleIndex = 0;
+        let currentSatisfaction = 0;
+
+        // ... (saveProgress, loadProgress, resetProgress, initGame, renderLevelTrack, positionGoku, startLevel, loadPuzzle are all the same) ...
+
+        // UNCHANGED FUNCTIONS FOR CONTEXT
+        function saveProgress() { localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState)); }
+        function loadProgress() {
+            const savedProgress = localStorage.getItem(STORAGE_KEY);
+            if (savedProgress) { gameState = JSON.parse(savedProgress); }
+            else {
+                gameState = JSON.parse(JSON.stringify(gameData));
+                gameState[0].status = 'unlocked';
+            }
+        }
+        function resetProgress() { if (confirm("Reset all progress?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+        function initGame() {
+            loadProgress();
+            renderLevelTrack();
+            positionGoku();
+            const resetButton = document.createElement('button'); resetButton.id = 'reset-progress-btn'; resetButton.title = 'Reset all progress'; resetButton.style.cssText = `position: fixed; bottom: 20px; right: 20px; background-color: #6c757d; color: white; border: none; border-radius: 50px; padding: 10px 20px; cursor: pointer; z-index: 2000; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);`; resetButton.innerHTML = `<i class="fas fa-sync-alt"></i> Reset Game`; resetButton.onclick = resetProgress; document.body.appendChild(resetButton);
+        }
+        function renderLevelTrack() {
+            levelTrack.querySelectorAll('.level-card').forEach(card => card.remove());
+            gameState.forEach(level => {
+                const card = document.createElement('div'); card.className = `level-card ${level.status}`; card.id = level.id; const mainCharacter = level.characters[0]; let buttonText = 'Locked'; let isClickable = false;
+                if (level.status === 'unlocked') { buttonText = 'Start Case'; isClickable = true; }
+                if (level.status === 'completed') { buttonText = 'Review Case'; isClickable = true; }
+                card.innerHTML = `<div class="character-avatar"><i class="${mainCharacter.icon}"></i></div><h3>${level.title}</h3><p class="prerequisite">${level.prerequisite}</p><button>${buttonText}</button>`;
+                if (isClickable) { card.querySelector('button').addEventListener('click', () => startLevel(level.id)); }
+                levelTrack.appendChild(card);
+            });
+        }
+        function positionGoku(targetLevelId = null) {
+            let targetCard; if (targetLevelId) { targetCard = document.getElementById(targetLevelId); } else { targetCard = document.querySelector('.level-card.unlocked'); if (!targetCard) { const completedCards = document.querySelectorAll('.level-card.completed'); targetCard = completedCards.length > 0 ? completedCards[completedCards.length - 1] : document.querySelector('.level-card'); } }
+            if (targetCard) { const cardCenter = targetCard.offsetLeft + (targetCard.offsetWidth / 2); const gokuHalfWidth = gokuCharacter.offsetWidth / 2; gokuCharacter.style.left = `${cardCenter - gokuHalfWidth}px`; targetCard.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' }); }
+        }
+        function startLevel(levelId) {
+            positionGoku(levelId); currentLevelId = levelId; currentPuzzleIndex = 0; currentSatisfaction = 0;
+            const level = gameState.find(l => l.id === levelId); satisfactionLabel.textContent = `${level.title} - Progress`; updateSatisfactionBar(); loadPuzzle();
+            setTimeout(() => { puzzleModalOverlay.style.display = 'flex'; setTimeout(() => { puzzleModal.style.transform = 'scale(1)'; puzzleModal.style.opacity = '1'; }, 10); }, 500);
+        }
+        function loadPuzzle() {
+            const level = gameState.find(l => l.id === currentLevelId); if (currentPuzzleIndex >= level.puzzles.length) return;
+            const puzzle = level.puzzles[currentPuzzleIndex]; characterNameEl.textContent = puzzle.character.name; dialogueTextEl.textContent = puzzle.dialogue; puzzleQuestionEl.textContent = puzzle.question; puzzleOptionsEl.innerHTML = ''; feedbackBox.style.display = 'none';
+            puzzle.options.forEach(optionText => { const button = document.createElement('button'); button.textContent = optionText; button.className = 'option-btn'; button.onclick = () => checkAnswer(optionText, button); puzzleOptionsEl.appendChild(button); });
+        }
+        function updateSatisfactionBar() { const level = gameState.find(l => l.id === currentLevelId); const progressPercent = Math.min(100, (currentSatisfaction / level.satisfactionGoal) * 100); satisfactionBar.style.width = `${progressPercent}%`; }
+
+        // --- UPDATED AND NEW FUNCTIONS ---
+
+        function checkAnswer(selectedAnswer, button) {
+            const level = gameState.find(l => l.id === currentLevelId);
+            const puzzle = level.puzzles[currentPuzzleIndex];
+            puzzleOptionsEl.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+            if (selectedAnswer === puzzle.correctAnswer) {
+                button.classList.add('correct');
+                currentSatisfaction += puzzle.satisfaction;
+                feedbackBox.innerHTML = `<strong>Correct!</strong> Progress made.`;
+                feedbackBox.style.backgroundColor = '#d1e7dd';
+            } else {
+                button.classList.add('incorrect');
+                feedbackBox.innerHTML = `<strong>Incorrect.</strong> Let's review the correct procedure.`;
+                feedbackBox.style.backgroundColor = '#f8d7da';
+                puzzleOptionsEl.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.textContent === puzzle.correctAnswer) btn.classList.add('correct');
+                });
+            }
+            feedbackBox.style.display = 'block';
+            updateSatisfactionBar();
+
+            // UPDATED LOGIC: Check for completion, failure, or continuation
+            setTimeout(() => {
+                // Check for PASS state first
+                if (currentSatisfaction >= level.satisfactionGoal) {
+                    if (level.status === 'completed') {
+                        closeModalAndReposition(); // Just reviewing, so close and go back.
+                    } else {
+                        completeLevel(); // First-time completion.
+                    }
+                } else {
+                    currentPuzzleIndex++;
+                    // Check for FAIL state (out of puzzles)
+                    if (currentPuzzleIndex >= level.puzzles.length) {
+                        failLevel();
+                    }
+                    // Otherwise, CONTINUE to next puzzle
+                    else {
+                        loadPuzzle();
+                    }
+                }
+            }, 2500);
+        }
+
+        // NEW: Handles the case where the player runs out of puzzles without meeting the goal.
+        function failLevel() {
+            feedbackBox.innerHTML = `<strong>Case Incomplete!</strong> The required progress was not met. Please review the material and try again.`;
+            feedbackBox.style.backgroundColor = '#f8d7da';
+            feedbackBox.style.display = 'block';
+
+            // Close the modal after a delay and move Goku back to the start of this level.
+            setTimeout(() => {
+                closeModalAndReposition(currentLevelId);
+            }, 3000);
+        }
+
+        function closeModalAndReposition(targetId = null) {
+            puzzleModal.style.transform = 'scale(0.9)';
+            puzzleModal.style.opacity = '0';
+            setTimeout(() => { puzzleModalOverlay.style.display = 'none'; }, 300);
+            positionGoku(targetId); // Move Goku to the target or the default active level
+        }
+
+        function completeLevel() {
+            const levelIndex = gameState.findIndex(l => l.id === currentLevelId);
+            gameState[levelIndex].status = 'completed';
+            if (levelIndex + 1 < gameState.length && gameState[levelIndex + 1].status === 'locked') {
+                gameState[levelIndex + 1].status = 'unlocked';
+            }
+            saveProgress();
+
+            closeModalAndReposition(); // Close modal and move Goku to the next active level
+            renderLevelTrack(); // Re-render to show the "completed" and "unlocked" status changes
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,331 @@
+/* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Teko:wght@700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css');
+
+/* ... (root variables are the same) ... */
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/double-bubble-outline.png');
+    background-color: #eef2f5;
+    overflow: hidden;
+    height: 100vh;
+    color: var(--dark-color);
+}
+
+.game-world {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+}
+
+/* --- MAIN HEADER (Updated for Responsiveness) --- */
+.main-header {
+    text-align: center;
+    /* padding: 10px 0 20px 0; */
+}
+
+.main-header h1 {
+    font-family: 'Teko', sans-serif;
+    /* OLD: font-size: 4rem; */
+    /* NEW: Responsive Font Size */
+    font-size: clamp(2.5rem, 1rem + 5vw, 4rem);
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #343a40;
+    text-transform: uppercase;
+}
+
+.main-header h1 span {
+    background: linear-gradient(45deg, var(--primary-color), #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
+}
+
+/* --- The rest of the CSS file is exactly the same --- */
+
+/* GOKU CHARACTER */
+#goku-character {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 80px;
+    height: 110px;
+    background-color: var(--primary-color);
+    border: 3px solid white;
+    border-radius: 40px 40px 10px 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 15px;
+    font-size: 2.5rem;
+    color: white;
+    transition: left 0.8s ease-in-out;
+    z-index: 10;
+}
+
+/* LEVEL TRACK */
+#level-track {
+    display: flex;
+    gap: 60px;
+    padding: 50px 0 120px 0;
+    overflow-x: auto;
+    position: relative;
+}
+
+.level-track-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 50px;
+}
+
+/* (The rest of the file continues as before...) */
+.level-card {
+    flex: 0 0 280px;
+    height: 380px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    border-top: 5px solid;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.level-card:hover {
+    transform: translateY(-10px);
+}
+
+.character-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: var(--dark-color);
+    border: 5px solid white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.character-avatar i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.level-card h3 {
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+.level-card .prerequisite {
+    font-style: italic;
+    color: #6c757d;
+    flex-grow: 1;
+    padding-top: 10px;
+}
+
+.level-card button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* CARD STATES */
+.level-card.locked {
+    border-color: #6c757d;
+    background-color: #f1f1f1;
+    color: #6c757d;
+}
+
+.level-card.locked .character-avatar {
+    background-color: #6c757d;
+}
+
+.level-card.locked h3 {
+    color: #6c757d;
+}
+
+.level-card.locked button {
+    background-color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.level-card.unlocked {
+    border-color: var(--warning-color);
+}
+
+.level-card.unlocked .character-avatar {
+    background-color: var(--warning-color);
+}
+
+.level-card.unlocked button {
+    background-color: var(--primary-color);
+}
+
+.level-card.completed {
+    border-color: var(--success-color);
+}
+
+.level-card.completed .character-avatar {
+    background-color: var(--success-color);
+}
+
+.level-card.completed button {
+    background-color: var(--success-color);
+}
+
+/* PUZZLE MODAL */
+#puzzle-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+#puzzle-modal {
+    width: 90%;
+    max-width: 600px;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+#satisfaction-container {
+    margin-bottom: 20px;
+}
+
+#satisfaction-container label {
+    font-weight: 600;
+}
+
+.satisfaction-bar-bg {
+    width: 100%;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#satisfaction-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #198754);
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+#character-dialogue {
+    border-left: 5px solid var(--primary-color);
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: var(--light-color);
+    border-radius: 5px;
+}
+
+#character-name {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+#dialogue-text {
+    font-style: italic;
+}
+
+#puzzle-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+#puzzle-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.option-btn:hover:not(:disabled) {
+    background-color: #eef5ff;
+    border-color: var(--primary-color);
+}
+
+.option-btn:disabled {
+    cursor: not-allowed;
+}
+
+.option-btn.correct {
+    background-color: #d1e7dd;
+    border-color: var(--success-color);
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.option-btn.incorrect {
+    background-color: #f8d7da;
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+#feedback-box {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    display: none;
+}
