@@ -34,8 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CHEAT CODE SETUP ---
     const cheatCodes = {
-        'boost': () => { gameState.score += 500; gameState.hints += 5; customAlert("Paragon Boost!", "Score +500, Hints +5!"); },
-        'goku': () => { gameData.levels.forEach(l => gameState.levelStatus[l.id].unlocked = true); customAlert("Cheat Activated", "All levels have been unlocked."); },
+        'boost': () => { 
+            gameState.score += 500; 
+            gameState.hints += 5; 
+            customAlert("Cheat Activated!", "Paragon Boost: Score +500, Hints +5!");
+            updateTopBarUI(); // Immediately update the UI to show the new values
+            saveProgress();
+        },
+        'goku': () => { 
+            gameData.levels.forEach(l => {
+                if (gameState.levelStatus[l.id]) {
+                    gameState.levelStatus[l.id].unlocked = true;
+                }
+            }); 
+            customAlert("Cheat Activated", "All levels have been unlocked!");
+            renderLevelTrack(); // Immediately re-render the level cards to show their new unlocked state
+            saveProgress();
+        },
         'resetcase': () => {
             if(currentLevelId) {
                 gameState.levelProgress[currentLevelId] = { puzzleIndex: 0, satisfaction: 0 };
