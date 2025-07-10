@@ -1,22 +1,23 @@
-add the styling of questions in the given below code:
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GST Paragon</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
 </head>
-
 <body>
+
+    <div id="loading-overlay" class="modal-overlay visible">
+        <div class="loader"></div>
+    </div>
 
     <div class="top-bar">
         <div class="top-bar-left">
-            <div class="hint-display" title="Complimentary Hints"><i class="fas fa-lightbulb"></i> x <span
-                    id="hint-count-display">0</span></div>
-            <button id="reset-btn" title="Reset Game"><i class="fas fa-sync-alt"></i></button>
+             <div class="hint-display" title="Complimentary Hints"><i class="fas fa-lightbulb"></i> x <span id="hint-count-display">0</span></div>
+             <button id="reset-btn" title="Reset Game"><i class="fas fa-sync-alt"></i></button>
         </div>
         <h1 class="game-title">GST <span>PARAGON</span></h1>
         <div class="top-bar-right">
@@ -25,44 +26,35 @@ add the styling of questions in the given below code:
     </div>
 
     <div id="game-world" class="game-world">
-        <div class="level-track-container">
-            <div id="level-track">
-                <div id="goku-character">
-                    <div id="goku-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                            class="fas fa-star"></i></div><i class="fas fa-user-tie"></i>
-                </div>
-            </div>
-        </div>
+        <div class="level-track-container"><div id="level-track"><div id="goku-character"><div id="goku-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><i class="fas fa-user-tie"></i></div></div></div>
     </div>
 
+    <!-- Animation & Cinematic Modals -->
     <div id="completion-animation-overlay" class="modal-overlay">
         <canvas id="confetti-canvas"></canvas>
         <div id="stamp-animation"></div>
     </div>
-
     <div id="cinematic-overlay" class="modal-overlay">
-        <div class="modal-content">
-            <h1 id="cinematic-title">GST <span>PARAGON</span></h1>
-            <p id="cinematic-text"></p>
-            <p class="prompt-text" id="cinematic-prompt">Click or press Enter to continue...</p>
-        </div>
+        <div class="modal-content"><h1 id="cinematic-title">GST <span>PARAGON</span></h1><p id="cinematic-text"></p><p class="prompt-text" id="cinematic-prompt">Click or press Enter to continue...</p></div>
     </div>
-
+    
+    <!-- Gameplay Modals -->
+    <div id="narrator-modal" class="modal-overlay">
+        <div class="modal-content"><i id="narrator-icon" class="fas fa-book-open"></i><h2 id="narrator-title"></h2><p id="narrator-text"></p><p class="prompt-text" id="narrator-prompt">Click or press Enter to continue...</p></div>
+    </div>
     <div id="character-intro-modal" class="modal-overlay">
-        <div class="modal-content"><i id="intro-char-icon"></i>
-            <h2 id="intro-char-name"></h2>
-            <p id="intro-char-bio"></p>
-            <p class="prompt-text" id="intro-prompt">Click or press Enter to continue...</p>
-        </div>
+        <div class="modal-content"><i id="intro-char-icon"></i><h2 id="intro-char-name"></h2><p id="intro-char-bio"></p><p class="prompt-text" id="intro-prompt">Click or press Enter to continue...</p></div>
     </div>
-
     <div id="goal-met-modal" class="modal-overlay">
+        <div class="modal-content"><h2><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Case Goal Met!</h2><p>You've unlocked the next case! You can move on, or continue this case to earn more score.</p><div style="display: flex; justify-content: space-around; margin-top: 20px;"><button id="move-on-btn">Move On</button><button id="continue-for-score-btn" style="background-color: var(--warning-color);">Continue for Score</button></div></div>
+    </div>
+    
+    <!-- New Custom Alert Modal -->
+    <div id="custom-alert-modal" class="modal-overlay">
         <div class="modal-content">
-            <h2><i class="fas fa-check-circle" style="color: var(--success-color);"></i> Case Goal Met!</h2>
-            <p>You've unlocked the next case! You can move on, or continue this case to earn more score.</p>
-            <div style="display: flex; justify-content: space-around; margin-top: 20px;"><button id="move-on-btn">Move
-                    On</button><button id="continue-for-score-btn"
-                    style="background-color: var(--warning-color);">Continue for Score</button></div>
+            <h2 id="custom-alert-title">Notification</h2>
+            <p id="custom-alert-text"></p>
+            <div id="custom-alert-buttons"></div>
         </div>
     </div>
 
@@ -70,36 +62,21 @@ add the styling of questions in the given below code:
         <div class="modal-content" id="puzzle-modal">
             <div class="puzzle-header">
                 <button id="hint-button-puzzle" title="Hint (H)"><i class="fas fa-lightbulb"></i></button>
-                <div id="satisfaction-tracker"><label>Case Satisfaction</label>
-                    <div class="satisfaction-bar-bg">
-                        <div id="satisfaction-bar"></div>
-                    </div>
-                </div>
+                <div id="satisfaction-tracker"><label>Case Satisfaction</label><div class="satisfaction-bar-bg"><div id="satisfaction-bar"></div></div></div>
                 <button id="exit-case-btn" title="Exit Case"><i class="fas fa-times"></i></button>
             </div>
-            <div id="character-dialogue">
-                <div>
-                    <div id="character-name"></div>
-                    <p id="dialogue-text"></p>
-                </div>
-            </div>
+            <div id="character-dialogue"><div><div id="character-name"></div><p id="dialogue-text"></p></div></div>
             <div id="puzzle-container">
                 <p id="puzzle-question"></p>
                 <div id="puzzle-options"></div>
-                <div id="knowledge-box">
-                    <h4>Case Debrief</h4>
-                    <p id="knowledge-text"></p>
-                    <p class="further-reading" id="knowledge-ref"></p>
-                </div>
+                <div id="knowledge-box"><h4>Case Debrief</h4><p id="knowledge-text"></p><p class="further-reading" id="knowledge-ref"></p></div>
             </div>
             <div id="feedback-box"></div>
-            <div class="puzzle-controls"><button id="skip-button" class="control-btn">Skip</button><button
-                    id="next-button" class="control-btn">Next</button></div>
+            <div class="puzzle-controls"><button id="prev-button" class="control-btn">Previous</button><button id="skip-button" class="control-btn">Skip</button><button id="next-button" class="control-btn">Next</button></div>
         </div>
     </div>
 
     <script src="game-data.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
